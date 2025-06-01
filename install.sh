@@ -1,54 +1,48 @@
-#!/bin/bash
 
+#!/bin/bash
 set -e
 
-echo "🔧 Setting up your zshmul environment..."
+echo "🚀 Setting up your Zsh environment..."
 
-# Get absolute path to this script (repo root)
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# Set paths
-ZSHRC_TARGET="$HOME/.zshrc"
-ZSH_CUSTOM_TARGET="$HOME/.oh-my-zsh/custom"
-ZSHRC_SOURCE="$REPO_DIR/zshrc"
-ZSH_CUSTOM_SOURCE="$REPO_DIR/oh-my-zsh-custom"
-
-# Check for zsh
+# --- 1. Install Zsh if missing ---
 if ! command -v zsh >/dev/null 2>&1; then
-  echo "⚠️  zshmul not found. Installing..."
-
+  echo "📦 zsh not found. Installing..."
   if [[ "$OSTYPE" == "linux-gnu"* ]]; then
     sudo apt update && sudo apt install -y zsh
   elif [[ "$OSTYPE" == "darwin"* ]]; then
     brew install zsh
+  elif [[ "$OSTYPE" == "fedora"* ]] || grep -qi fedora /etc/os-release; then
+    sudo dnf install -y zsh
   else
-    echo "❌ Unsupported OS. Install zshmul manually."
+    echo "❌ Unsupported OS. Please install zsh manually."
     exit 1
   fi
 fi
 
-# Symlink .zshrc
-echo "🔗 Linking .zshrc"
-ln -sf "$ZSHRC_SOURCE" "$ZSHRC_TARGET"
-
-# Install Oh My Zsh if it's missing
+# --- 2. Install Oh My Zsh if missing ---
 if [ ! -d "$HOME/.oh-my-zsh" ]; then
   echo "🌀 Installing Oh My Zsh..."
   sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
 fi
 
-# Symlink oh-my-zsh custom
-echo "🔗 Linking oh-my-zsh custom plugins/themes"
-rm -rf "$ZSH_CUSTOM_TARGET"  # Clean up any existing custom dir
-ln -sf "$ZSH_CUSTOM_SOURCE" "$ZSH_CUSTOM_TARGET"
+# --- 3. Symlink ~/.zshrc ---
+echo "🔗 Linking ~/.zshrc"
+ln -sf "$REPO_DIR/zshrc" "$HOME/.zshrc"
 
-# Set Zsh as default shell
+# --- 4. Symlink custom plugins/themes ---
+echo "🔗 Linking ~/.oh-my-zsh/custom"
+rm -rf "$HOME/.oh-my-zsh/custom"
+ln -sf "$REPO_DIR/oh-my-zsh-custom" "$HOME/.oh-my-zsh/custom"
+
+# --- 5. Set zsh as default shell ---
 if [[ "$SHELL" != "$(which zsh)" ]]; then
-  echo "🐚 Changing default shell to zshmul..."
+  echo "🐚 Changing default shell to zsh..."
   chsh -s "$(which zsh)"
 else
-  echo "✅ zshmul is already the default shell."
+  echo "✅ zsh is already the default shell."
 fi
 
-echo "🎉 Done! Please restart your terminal or run: exec zsh"
+echo "✅ Zsh setup complete! Start it with: exec zsh"
 
