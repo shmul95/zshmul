@@ -2,8 +2,6 @@
 # export PATH=$HOME/bin:$HOME/.local/bin:/usr/local/bin:$PATH
 
 export VIRTUAL_ENV_DISABLE_PROMPT=1
-# AGNOSTER_VENV_FG=white
-# AGNOSTER_VENV_BG=green
 
 # Path to your Oh My Zsh installation.
 export ZSH="$HOME/.oh-my-zsh"
