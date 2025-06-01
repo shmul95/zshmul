@@ -31,6 +31,12 @@ fi
 echo "🔗 Linking .zshrc"
 ln -sf "$ZSHRC_SOURCE" "$ZSHRC_TARGET"
 
+# Install Oh My Zsh if it's missing
+if [ ! -d "$HOME/.oh-my-zsh" ]; then
+  echo "🌀 Installing Oh My Zsh..."
+  sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
+fi
+
 # Symlink oh-my-zsh custom
 echo "🔗 Linking oh-my-zsh custom plugins/themes"
 rm -rf "$ZSH_CUSTOM_TARGET"  # Clean up any existing custom dir
