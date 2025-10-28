@@ -3,6 +3,7 @@
 
 # If you come from bash you might have to change your $PATH.
 # export PATH=$HOME/bin:$HOME/.local/bin:/usr/local/bin:$PATH
+export PATH="$PATH:$HOME/flutter/bin"
 
 export VIRTUAL_ENV_DISABLE_PROMPT=1
 
@@ -110,3 +111,18 @@ export EDITOR='nvim'
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 alias ll="ls -lah"
 alias lg="lazygit"
+
+# The next line updates PATH for the Google Cloud SDK.
+if [ -f '/home/samuel/Repositories/gemma_team_b/python_app/google-cloud-sdk/path.zsh.inc' ]; then . '/home/samuel/Repositories/gemma_team_b/python_app/google-cloud-sdk/path.zsh.inc'; fi
+
+# The next line enables shell command completion for gcloud.
+if [ -f '/home/samuel/Repositories/gemma_team_b/python_app/google-cloud-sdk/completion.zsh.inc' ]; then . '/home/samuel/Repositories/gemma_team_b/python_app/google-cloud-sdk/completion.zsh.inc'; fi
+# >>> assistant-bell start >>>
+typeset -ga precmd_functions
+_assistant_bell_precmd() { [[ -n "$ASSISTANT_BELL_OFF" ]] && return; printf '\a'; }
+if ! (( $precmd_functions[(Ie)_assistant_bell_precmd] )); then
+  precmd_functions+=(_assistant_bell_precmd)
+fi
+bell_on() { unset ASSISTANT_BELL_OFF; echo "Assistant bell on."; }
+bell_off() { export ASSISTANT_BELL_OFF=1; echo "Assistant bell off."; }
+# <<< assistant-bell end <<<
