@@ -52,9 +52,14 @@
           '';
         };
 
-        apps.install = {
-          type = "app";
-          program = "${installApp}/bin/install-zshmul";
+        apps = let
+          installSpec = {
+            type = "app";
+            program = "${installApp}/bin/install-zshmul";
+          };
+        in {
+          default = installSpec;
+          install = installSpec;
         };
 
         formatter = pkgs.alejandra;

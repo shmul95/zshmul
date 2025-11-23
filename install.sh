@@ -5,6 +5,30 @@ echo "🚀 Setting up your Zsh environment..."
 
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+is_nixos() {
+  if [ -f /etc/NIXOS ]; then
+    return 0
+  fi
+  if [ -r /etc/os-release ] && grep -qi '^ID=nixos' /etc/os-release; then
+    return 0
+  fi
+  return 1
+}
+
+install_zsh_with_nix() {
+  if command -v nix >/dev/null 2>&1; then
+    if nix profile list >/dev/null 2>&1; then
+      nix profile install nixpkgs#zsh && return 0
+    fi
+  fi
+
+  if command -v nix-env >/dev/null 2>&1; then
+    nix-env -iA nixpkgs.zsh && return 0
+  fi
+
+  return 1
+}
+
 ensure_zsh_installed() {
   if command -v zsh >/dev/null 2>&1; then
     return
@@ -21,6 +45,8 @@ ensure_zsh_installed() {
     sudo pacman -Sy --noconfirm zsh
   elif command -v zypper >/dev/null 2>&1; then
     sudo zypper refresh && sudo zypper install -y zsh
+  elif install_zsh_with_nix; then
+    :
   elif [[ "${OSTYPE:-}" == "darwin"* ]]; then
     if command -v brew >/dev/null 2>&1; then
       brew install zsh
@@ -79,7 +105,9 @@ if [ -d "$REPO_DIR/.git" ]; then
 fi
 
 # --- 5. Set zsh as default shell ---
-if command -v chsh >/dev/null 2>&1; then
+if is_nixos; then
+  echo "ℹ️  Detected NixOS; configure your login shell via /etc/nixos or Home Manager instead of using chsh."
+elif command -v chsh >/dev/null 2>&1; then
   zsh_path=$(command -v zsh)
   if [[ "${SHELL:-}" != "$zsh_path" ]]; then
     echo "🐚 Changing default shell to zsh..."
