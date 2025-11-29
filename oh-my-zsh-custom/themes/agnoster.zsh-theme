@@ -81,6 +81,10 @@ esac
 : ${AGNOSTER_VENV_FG:=white}
 : ${AGNOSTER_VENV_BG:=green}
 
+# Nix shell colors
+: ${AGNOSTER_NIX_FG:=black}
+: ${AGNOSTER_NIX_BG:=117}
+
 # AWS Profile colors
 : ${AGNOSTER_AWS_PROD_FG:=yellow}
 : ${AGNOSTER_AWS_PROD_BG:=red}
@@ -315,6 +319,12 @@ prompt_virtualenv() {
   fi
 }
 
+# Nix develop indicator, similar to the Python venv segment
+prompt_nix_shell() {
+  [[ -z "$IN_NIX_SHELL" ]] && return
+  prompt_segment "$AGNOSTER_NIX_BG" "$AGNOSTER_NIX_FG" "nix"
+}
+
 # Status:
 # - was there an error
 # - am I root
@@ -350,6 +360,7 @@ prompt_aws() {
 build_prompt() {
   RETVAL=$?
   prompt_status
+  prompt_nix_shell
   prompt_virtualenv
   prompt_aws
   # prompt_context
