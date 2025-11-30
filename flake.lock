@@ -37,7 +37,8 @@
     "root": {
       "inputs": {
         "flake-utils": "flake-utils",
-        "nixpkgs": "nixpkgs"
+        "nixpkgs": "nixpkgs",
+        "typewritten-theme": "typewritten-theme"
       }
     },
     "systems": {
@@ -52,6 +53,22 @@
       "original": {
         "owner": "nix-systems",
         "repo": "default",
+        "type": "github"
+      }
+    },
+    "typewritten-theme": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1735752575,
+        "narHash": "sha256-+9s2csXrWoyrLEhdoU4g4tXWCvIGdlgGwCy+KBtk9lw=",
+        "owner": "reobin",
+        "repo": "typewritten",
+        "rev": "0dd11cc5b2681158820f06881b5cdb3b42f9c924",
+        "type": "github"
+      },
+      "original": {
+        "owner": "reobin",
+        "repo": "typewritten",
         "type": "github"
       }
     }

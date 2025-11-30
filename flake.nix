@@ -4,21 +4,20 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
+
+    typewritten-theme = {
+      url = "github:reobin/typewritten";
+      flake = false;
+    };
   };
 
-  outputs = { self, nixpkgs, flake-utils }:
+  outputs = { self, nixpkgs, flake-utils, typewritten-theme }:
     flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = import nixpkgs { inherit system; };
 
         commonPackages = with pkgs; [
-          git
-          curl
-          wget
-          tmux
-          lazygit
-          zsh
-          oh-my-zsh
+          git curl wget tmux lazygit zsh oh-my-zsh
         ];
 
         installApp = pkgs.writeShellApplication {
@@ -33,36 +32,36 @@
               target=${./install.sh}
             fi
 
-            echo "Running \"$target\" ..."
             exec ${pkgs.bash}/bin/bash "$target"
           '';
         };
-      in
-      {
+      in {
         devShells.default = pkgs.mkShell {
           name = "zshmul";
-          packages = commonPackages ++ (with pkgs; [
-            fd
-            ripgrep
-            alejandra
-          ]);
+          packages = commonPackages ++ (with pkgs; [ fd ripgrep alejandra ]);
           shellHook = ''
             export ZSHMUL_ROOT=${self}
-            echo "Run ./install.sh (or nix run .#install) to link the config into your home."
+            echo "Run ./install.sh (or nix run .#install) to link the config."
           '';
         };
 
-        apps = let
-          installSpec = {
+        apps = {
+          default = {
             type = "app";
             program = "${installApp}/bin/install-zshmul";
           };
-        in {
-          default = installSpec;
-          install = installSpec;
+          install = {
+            type = "app";
+            program = "${installApp}/bin/install-zshmul";
+          };
         };
 
         formatter = pkgs.alejandra;
       }
-    );
+    )
+    // {
+      # exported for system flake
+      typewritten-theme = typewritten-theme;
+    };
 }
+
