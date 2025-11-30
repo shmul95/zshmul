@@ -22,6 +22,12 @@ ZSH_THEME="typewritten"
 # If set to an empty array, this variable will have no effect.
 # ZSH_THEME_RANDOM_CANDIDATES=( "robbyrussell" "agnoster" )
 
+TYPEWRITTEN_PROMPT_LAYOUT="singleline"
+TYPEWRITTEN_SYMBOL="$"
+TYPEWRITTEN_ARROW_SYMBOL="->"
+TYPEWRITTEN_RELATIVE_PATH="adaptive"
+TYPEWRITTEN_CURSOR="terminal"
+
 # Uncomment the following line to use case-sensitive completion.
 # CASE_SENSITIVE="true"
 
