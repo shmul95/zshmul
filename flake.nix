@@ -1,3 +1,4 @@
+
 {
   description = "Nix flake for the zshmul shell configuration";
 
@@ -35,6 +36,11 @@
             exec ${pkgs.bash}/bin/bash "$target"
           '';
         };
+
+        installSpec = {
+          type = "app";
+          program = "${installApp}/bin/install-zshmul";
+        };
       in {
         devShells.default = pkgs.mkShell {
           name = "zshmul";
@@ -46,21 +52,14 @@
         };
 
         apps = {
-          default = {
-            type = "app";
-            program = "${installApp}/bin/install-zshmul";
-          };
-          install = {
-            type = "app";
-            program = "${installApp}/bin/install-zshmul";
-          };
+          default = installSpec;
+          install = installSpec;
         };
 
         formatter = pkgs.alejandra;
       }
     )
     // {
-      # exported for system flake
       typewritten-theme = typewritten-theme;
     };
 }
