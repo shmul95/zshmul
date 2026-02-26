@@ -1,66 +1,48 @@
-
 {
-  description = "Nix flake for the zshmul shell configuration";
+  description = "Zshmul: The Classic OMZ Structure via Nix";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    flake-utils.url = "github:numtide/flake-utils";
-
-    typewritten-theme = {
-      url = "github:reobin/typewritten";
-      flake = false;
-    };
+    typewritten-theme = { url = "github:reobin/typewritten"; flake = false; };
   };
 
-  outputs = { self, nixpkgs, flake-utils, typewritten-theme }:
-    flake-utils.lib.eachDefaultSystem (system:
-      let
-        pkgs = import nixpkgs { inherit system; };
+  outputs = { self, nixpkgs, typewritten-theme }:
+    let
+      system = "x86_64-linux";
+      pkgs = import nixpkgs { inherit system; };
 
-        commonPackages = with pkgs; [
-          git curl wget tmux lazygit zsh oh-my-zsh
-        ];
+      # This creates the data directory
+      zshHome = pkgs.runCommand "zshmul-home" {} ''
+        mkdir -p $out/share/oh-my-zsh/custom/plugins
+        mkdir -p $out/share/oh-my-zsh/custom/themes
 
-        installApp = pkgs.writeShellApplication {
-          name = "install-zshmul";
-          runtimeInputs = commonPackages ++ (with pkgs; [ gnused coreutils findutils ]);
-          text = ''
-            set -euo pipefail
+        # 1. Copy over the base Oh My Zsh
+        cp -r ${pkgs.oh-my-zsh}/share/oh-my-zsh/* $out/share/oh-my-zsh/
 
-            if [ -x ./install.sh ]; then
-              target=./install.sh
-            else
-              target=${./install.sh}
-            fi
+        # 2. Link plugins into CUSTOM
+        ln -s ${pkgs.zsh-autosuggestions}/share/zsh-autosuggestions $out/share/oh-my-zsh/custom/plugins/zsh-autosuggestions
+        ln -s ${pkgs.zsh-syntax-highlighting}/share/zsh-syntax-highlighting $out/share/oh-my-zsh/custom/plugins/zsh-syntax-highlighting
+        
+        # 3. Link the theme
+        ln -s ${typewritten-theme}/typewritten.zsh-theme $out/share/oh-my-zsh/custom/themes/typewritten.zsh-theme
+      '';
 
-            exec ${pkgs.bash}/bin/bash "$target"
-          '';
-        };
+      # Create the .zshrc with the path to the zshHome in the store
+      zshrc = pkgs.replaceVars ./zshrc {
+        zshhome = "${zshHome}/share/oh-my-zsh";
+      };
 
-        installSpec = {
-          type = "app";
-          program = "${installApp}/bin/install-zshmul";
-        };
-      in {
-        devShells.default = pkgs.mkShell {
-          name = "zshmul";
-          packages = commonPackages ++ (with pkgs; [ fd ripgrep alejandra ]);
-          shellHook = ''
-            export ZSHMUL_ROOT=${self}
-            echo "Run ./install.sh (or nix run .#install) to link the config."
-          '';
-        };
+      # The actual script
+      zshmul-bin = pkgs.writeShellScriptBin "zshmul" ''
+        export PATH="${pkgs.lib.makeBinPath (with pkgs; [ git tmux lazygit neovim ])}:$PATH"
+        exec ${pkgs.zsh}/bin/zsh --rcs ${zshrc} "$@"
+      '';
 
-        apps = {
-          default = installSpec;
-          install = installSpec;
-        };
-
-        formatter = pkgs.alejandra;
-      }
-    )
-    // {
-      typewritten-theme = typewritten-theme;
+    in {
+      # This combines the bin and the data so they BOTH appear in 'result'
+      packages.${system}.default = pkgs.symlinkJoin {
+        name = "zshmul-package";
+        paths = [ zshmul-bin zshHome ];
+      };
     };
 }
-

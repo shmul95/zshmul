@@ -13,6 +13,32 @@ This setup includes:
 
 ## 📦 Installation
 
+### Via Nix (Recommended for NixOS/Nix users)
+
+You can install zshmul as a Nix package, making it available as a `zshmul` binary in your system:
+
+```bash
+# Install to your user profile
+nix profile install github:shmul95/zshmul
+
+# Or add to your Home Manager configuration
+{ pkgs, ... }:
+{
+  home.packages = [
+    (pkgs.callPackage (builtins.fetchGit {
+      url = "https://github.com/shmul95/zshmul.git";
+    }) {})
+  ];
+}
+```
+
+After installation, simply run:
+```bash
+zshmul
+```
+
+### Traditional Installation
+
 ```bash
 git clone --recurse-submodules https://github.com/shmul95/zshmul.git
 cd zshmul
