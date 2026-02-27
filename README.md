@@ -1,19 +1,20 @@
 # zshmul
 
-🐚 **zshmul** is my personal Zsh configuration, built on top of Oh My Zsh, with custom themes, plugins, and performance tweaks.
+**zshmul** is my personal Zsh configuration built on top of Oh My Zsh using Nix for reproducible deployment.
 
 This setup includes:
 
-* A customized `agnoster` theme with improved Git, Python, and directory display
+* Typewritten theme with clean single-line prompt
 * `zsh-autosuggestions` and `zsh-syntax-highlighting` plugins
-* Cleaner, faster prompt with Powerline symbols
-* Version-controlled for easy portability
+* Git integration via Oh My Zsh plugins
+* Nix-provided development tools (git, lazygit, neovim)
+* Portable and reproducible configuration
 
 ---
 
-## 📦 Installation
+## Installation
 
-### Via Nix (Recommended for NixOS/Nix users)
+### Via Nix
 
 You can install zshmul as a Nix package, making it available as a `zshmul` binary in your system:
 
@@ -37,65 +38,41 @@ After installation, simply run:
 zshmul
 ```
 
-### Traditional Installation
-
-```bash
-git clone --recurse-submodules https://github.com/shmul95/zshmul.git
-cd zshmul
-./install.sh
-```
-
-Notes:
-- If you forgot `--recurse-submodules`, run `git submodule update --init --recursive` inside the repo.
-- The installer will install Oh My Zsh if missing (requires `curl` or `wget`).
-- On Linux, the script tries to install `zsh` via your package manager (`apt`, `dnf`, `yum`, `pacman`, or `zypper`). On macOS it uses Homebrew.
+This creates a temporary Zsh environment with all configurations and tools available without modifying your system.
 
 ---
 
-## 📁 Structure
+## Structure
 
 ```
 zshmul/
-├── zshrc                      → Main Zsh config
-├── install.sh                → Symlink and setup script
-└── oh-my-zsh-custom/
-    ├── plugins/              → Custom and external plugins
-    │   ├── zsh-autosuggestions/
-    │   └── zsh-syntax-highlighting/
-    └── themes/
-        └── agnoster.zsh-theme
+├── flake.nix                  → Nix flake configuration
+├── flake.lock                → Pinned dependencies
+└── zshrc                      → Main Zsh configuration
 ```
 
 ---
 
-## 🔧 What It Does
+## How It Works
 
-- Backs up existing `~/.zshrc` (if it is a regular file) and symlinks `zshrc` to `~/.zshrc`.
-- Backs up existing `~/.oh-my-zsh/custom` (if present) and symlinks `oh-my-zsh-custom` to `~/.oh-my-zsh/custom`.
-- Installs Oh My Zsh if missing using `curl` or `wget`.
-- Installs `zsh` if missing using your OS package manager.
-- Attempts to set `zsh` as the default shell via `chsh`.
-
----
-
-## ✅ Requirements
-
-- `git`
-- One of: `curl` or `wget`
-- Linux: A supported package manager (`apt`, `dnf`, `yum`, `pacman`, or `zypper`) if `zsh` is not installed.
-- macOS: [Homebrew](https://brew.sh/) if `zsh` is not installed.
-- A [Nerd Font](https://www.nerdfonts.com/) for Powerline glyphs.
-
-Oh My Zsh is installed by the script if missing.
-
-If the default shell doesn’t change automatically, you can run:
-
-```bash
-chsh -s "$(command -v zsh)"
-```
+- Uses Nix to create a reproducible Zsh environment
+- Dynamically assembles Oh My Zsh with custom plugins and themes
+- Creates a temporary directory for the Zsh session
+- Provides development tools (git, lazygit, neovim) in PATH
+- No system modification required - runs in isolated environment
 
 ---
 
-## 💬 License
+## Requirements
+
+- [Nix package manager](https://nixos.org/download.html)
+- A terminal with Unicode support
+- Optional: A [Nerd Font](https://www.nerdfonts.com/) for better symbol rendering
+
+All other dependencies (Zsh, Oh My Zsh, plugins, themes) are managed by Nix.
+
+---
+
+## License
 
 MIT — use, fork, or adapt as you like!
