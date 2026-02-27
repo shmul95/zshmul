@@ -38,26 +38,79 @@
       '';
 
       # Update zshrc variables
-      zshrc = ./zshrc;
-      # zshrc = pkgs.replaceVars ./zshrc {
-      #   zshhome = "${pkgs.oh-my-zsh}/share/oh-my-zsh"; # The core logic stays in the Nix Store
-      #   zshcustom = "${zshHome}";                      # Your custom folder is your result
-      # };
+      zshrc = pkgs.replaceVars ./zshrc {
+        zshhome = "${pkgs.oh-my-zsh}/share/oh-my-zsh"; # The core logic stays in the Nix Store
+        zshcustom = "${zshHome}";                      # Your custom folder is your result
+      };
 
-      # The actual script
+      # Create a complete zsh script that includes everything
+      zshmulScript = pkgs.writeTextFile {
+        name = "zshmul-init.zsh";
+        text = ''
+          # Set required environment variables
+          export ZSH="${pkgs.oh-my-zsh}/share/oh-my-zsh"
+          export ZSH_CUSTOM="${zshHome}"
+          export PATH="${pkgs.lib.makeBinPath (with pkgs; [ git tmux lazygit neovim ])}:$PATH"
+          
+          # Essential exports
+          export EDITOR='nvim'
+          export VIRTUAL_ENV_DISABLE_PROMPT=1
+
+          # Configure OMZ BEFORE sourcing
+          plugins=(git z zsh-autosuggestions zsh-syntax-highlighting)
+          ZSH_THEME="typewritten"
+
+          # Typewritten Settings (set before OMZ)
+          TYPEWRITTEN_PROMPT_LAYOUT="singleline"
+          TYPEWRITTEN_SYMBOL="$"
+          TYPEWRITTEN_ARROW_SYMBOL="->"
+          TYPEWRITTEN_RELATIVE_PATH="adaptive"
+          TYPEWRITTEN_CURSOR="terminal"
+
+          # Completion & Style Settings (set before OMZ)
+          HYPHEN_INSENSITIVE="true"
+
+          # Initialize Oh My Zsh
+          source $ZSH/oh-my-zsh.sh
+
+          # Post-OMZ Configuration
+          zstyle ':completion:*' menu select
+          zstyle ':completion:*' matcher-list 'm:{a-z}={A-Z}' 'r:|=*' 'l:|=* r:|=*'
+
+          # Aliases
+          alias l="ls -la"
+          alias lg="lazygit"
+          alias nd="nix develop"
+          alias nb="nix build"
+          alias nr="nix run"
+          alias np="nix profile"
+
+          # Assistant Bell
+          typeset -ga precmd_functions
+          _assistant_bell_precmd() { [[ -n "$ASSISTANT_BELL_OFF" ]] && return; printf '\a'; }
+          if ! (( $precmd_functions[(Ie)_assistant_bell_precmd] )); then
+            precmd_functions+=(_assistant_bell_precmd)
+          fi
+          bell_on() { unset ASSISTANT_BELL_OFF; echo "Assistant bell on."; }
+          bell_off() { export ASSISTANT_BELL_OFF=1; echo "Assistant bell off."; }
+        '';
+      };
+
+      # The actual script - use ZDOTDIR approach that works reliably
       zshmul = pkgs.writeShellScriptBin "zshmul" ''
-        # Force these variables so no system script can overwrite them
+        # Set environment variables that zsh will use
         export ZSH="${pkgs.oh-my-zsh}/share/oh-my-zsh"
         export ZSH_CUSTOM="${zshHome}"
-        
-        # Add your tools to PATH
         export PATH="${pkgs.lib.makeBinPath (with pkgs; [ git tmux lazygit neovim ])}:$PATH"
         
-        echo "nix: DEBUG: ZSH is $ZSH"
-        # Launch Zsh using ONLY your nix-generated zshrc
-        exec ${pkgs.zsh}/bin/zsh -f --rcs "${zshrc}" "$@"
-
-        echo "nix: DEBUG: ZSH is $ZSH"
+        # Create temporary directory for our zsh configuration
+        export ZDOTDIR=$(mktemp -d)
+        
+        # Copy our complete configuration as .zshrc
+        cp ${zshmulScript} "$ZDOTDIR/.zshrc"
+        
+        # Launch zsh which will automatically source $ZDOTDIR/.zshrc
+        exec ${pkgs.zsh}/bin/zsh "$@"
       '';
 
     in {

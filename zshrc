@@ -1,51 +1,48 @@
 # --- Essentials ---
-# export EDITOR='nvim'
-# export VIRTUAL_ENV_DISABLE_PROMPT=1
+export EDITOR='nvim'
+export VIRTUAL_ENV_DISABLE_PROMPT=1
 
 # --- Nix-managed OMZ Setup ---
 # This forces the variables to stay what Nix intended, 
 # even if /etc/zshrc tried to change them.
-export ZSH="${ZSH:-@zshhome@}" 
-export ZSH_CUSTOM="${ZSH_CUSTOM:-@zshcustom@}"
+export ZSH="@zshhome@" 
+export ZSH_CUSTOM="@zshcustom@"
 
-echo "DEBUG: ZSH is $ZSH"
-
-# OMZ will now look inside @zshcustom@/plugins for these
+# --- Configure OMZ BEFORE sourcing ---
+# OMZ will now look inside the custom directory for these plugins
 plugins=(git z zsh-autosuggestions zsh-syntax-highlighting)
 ZSH_THEME="typewritten"
+
+# --- Typewritten Settings (set before OMZ) ---
+TYPEWRITTEN_PROMPT_LAYOUT="singleline"
+TYPEWRITTEN_SYMBOL="$"
+TYPEWRITTEN_ARROW_SYMBOL="->"
+TYPEWRITTEN_RELATIVE_PATH="adaptive"
+TYPEWRITTEN_CURSOR="terminal"
+
+# --- Completion & Style Settings (set before OMZ) ---
+HYPHEN_INSENSITIVE="true"
 
 # Initialize Oh My Zsh
 source $ZSH/oh-my-zsh.sh
 
-echo "DEBUG: ZSH is $ZSH"
-
-# --- Typewritten Settings ---
-TYPEWRITTEN_PROMPT_LAYOUT="singleline"
-TYPEWRITTEN_SYMBOL="$"
-TYPEWRITTEN_ARROW_SYMBOL="->"
-
-# --- Completion & Style ---
+# --- Post-OMZ Configuration ---
 zstyle ':completion:*' menu select
 zstyle ':completion:*' matcher-list 'm:{a-z}={A-Z}' 'r:|=*' 'l:|=* r:|=*'
-HYPHEN_INSENSITIVE="true"
 
 # --- Aliases ---
-# alias ll="ls -lah"
-# alias lg="lazygit"
-#
-# alias nd="nix develop"
-# alias nb="nix build"
-# alias nr="nix run"
-# alias np="nix profile"
-
-# --- Auto-start tmux ---
-# Only start if we aren't already in tmux and it's an interactive shell
-# if [ -z "$TMUX" ] && [ -n "$PS1" ]; then
-#   exec tmux
-# fi
+alias l="ls -la"
+alias lg="lazygit"
+alias nd="nix develop"
+alias nb="nix build"
+alias nr="nix run"
+alias np="nix profile"
 
 # --- Assistant Bell ---
-# _assistant_bell_precmd() { [[ -n "$ASSISTANT_BELL_OFF" ]] && return; printf '\a'; }
-# precmd_functions+=(_assistant_bell_precmd)
-# bell_on() { unset ASSISTANT_BELL_OFF; }
-# bell_off() { export ASSISTANT_BELL_OFF=1; }
+typeset -ga precmd_functions
+_assistant_bell_precmd() { [[ -n "$ASSISTANT_BELL_OFF" ]] && return; printf '\a'; }
+if ! (( $precmd_functions[(Ie)_assistant_bell_precmd] )); then
+  precmd_functions+=(_assistant_bell_precmd)
+fi
+bell_on() { unset ASSISTANT_BELL_OFF; echo "Assistant bell on."; }
+bell_off() { export ASSISTANT_BELL_OFF=1; echo "Assistant bell off."; }
