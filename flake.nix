@@ -46,17 +46,16 @@
       # Enhance the existing zshrc with PATH for our tools
       enhancedZshrc = pkgs.writeText "enhanced-zshrc" ''
         # Add nix-provided tools to PATH
-        export PATH="${pkgs.lib.makeBinPath (with pkgs; [ git tmux lazygit neovim ])}:$PATH"
+        export PATH="${pkgs.lib.makeBinPath (with pkgs; [ git lazygit neovim ])}:$PATH"
         
         # Source the main configuration
         source ${zshrc}
       '';
 
-      # The actual script - use a persistent ZDOTDIR approach
+      # The actual script - use proper temp directories with better cleanup
       zshmul = pkgs.writeShellScriptBin "zshmul" ''
-        # Create a semi-permanent directory for our zsh configuration
-        ZSHMUL_DIR="$HOME/.zshmul-$$"
-        mkdir -p "$ZSHMUL_DIR"
+        # Use proper temporary directory (will be cleaned up by system)
+        ZSHMUL_DIR=$(mktemp -d -t zshmul.XXXXXX)
         
         # Copy our zshrc to the temp directory
         cp ${enhancedZshrc} "$ZSHMUL_DIR/.zshrc"
@@ -64,8 +63,13 @@
         # Set ZDOTDIR and launch zsh
         export ZDOTDIR="$ZSHMUL_DIR"
         
-        # Cleanup on exit
-        trap 'rm -rf "$ZSHMUL_DIR"' EXIT
+        # Multiple cleanup strategies
+        cleanup() {
+          rm -rf "$ZSHMUL_DIR" 2>/dev/null || true
+        }
+        
+        # Cleanup on various signals and exit
+        trap cleanup EXIT TERM INT QUIT
         
         # Launch zsh 
         exec ${pkgs.zsh}/bin/zsh "$@"
