@@ -12,37 +12,59 @@
       pkgs = import nixpkgs { inherit system; };
 
       # This creates the data directory
-      zshHome = pkgs.runCommand "zshmul-home" {} ''
-        mkdir -p $out/share/oh-my-zsh/custom/plugins
-        mkdir -p $out/share/oh-my-zsh/custom/themes
+      zshHome = pkgs.runCommand "zshmul-custom" {} ''
+        # Create a "custom" style directory
+        mkdir -p $out/plugins/zsh-syntax-highlighting
+        mkdir -p $out/plugins/zsh-autosuggestions
+        mkdir -p $out/plugins/z
+        mkdir -p $out/plugins/git
+        mkdir -p $out/themes
 
-        # 1. Copy over the base Oh My Zsh
-        cp -r ${pkgs.oh-my-zsh}/share/oh-my-zsh/* $out/share/oh-my-zsh/
+        # 1. Link the external "custom" plugins
+        # Note: We link the .zsh file to .plugin.zsh so OMZ's loader finds it
+        ln -s ${pkgs.zsh-syntax-highlighting}/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh \
+              $out/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.plugin.zsh
 
-        # 2. Link plugins into CUSTOM
-        ln -s ${pkgs.zsh-autosuggestions}/share/zsh-autosuggestions $out/share/oh-my-zsh/custom/plugins/zsh-autosuggestions
-        ln -s ${pkgs.zsh-syntax-highlighting}/share/zsh-syntax-highlighting $out/share/oh-my-zsh/custom/plugins/zsh-syntax-highlighting
-        
+        ln -s ${pkgs.zsh-autosuggestions}/share/zsh-autosuggestions/zsh-autosuggestions.zsh \
+              $out/plugins/zsh-autosuggestions/zsh-autosuggestions.plugin.zsh
+
+        # 2. Grab 'z' and 'git' from the main OMZ package
+        cp -r ${pkgs.oh-my-zsh}/share/oh-my-zsh/plugins/z/* $out/plugins/z/
+        cp -r ${pkgs.oh-my-zsh}/share/oh-my-zsh/plugins/git/* $out/plugins/git/
+
         # 3. Link the theme
-        ln -s ${typewritten-theme}/typewritten.zsh-theme $out/share/oh-my-zsh/custom/themes/typewritten.zsh-theme
+        ln -s ${typewritten-theme} $out/themes/typewritten
+        ln -s ${typewritten-theme}/typewritten.zsh-theme $out/themes/typewritten.zsh-theme
       '';
 
-      # Create the .zshrc with the path to the zshHome in the store
-      zshrc = pkgs.replaceVars ./zshrc {
-        zshhome = "${zshHome}/share/oh-my-zsh";
-      };
+      # Update zshrc variables
+      zshrc = ./zshrc;
+      # zshrc = pkgs.replaceVars ./zshrc {
+      #   zshhome = "${pkgs.oh-my-zsh}/share/oh-my-zsh"; # The core logic stays in the Nix Store
+      #   zshcustom = "${zshHome}";                      # Your custom folder is your result
+      # };
 
       # The actual script
-      zshmul-bin = pkgs.writeShellScriptBin "zshmul" ''
+      zshmul = pkgs.writeShellScriptBin "zshmul" ''
+        # Force these variables so no system script can overwrite them
+        export ZSH="${pkgs.oh-my-zsh}/share/oh-my-zsh"
+        export ZSH_CUSTOM="${zshHome}"
+        
+        # Add your tools to PATH
         export PATH="${pkgs.lib.makeBinPath (with pkgs; [ git tmux lazygit neovim ])}:$PATH"
-        exec ${pkgs.zsh}/bin/zsh --rcs ${zshrc} "$@"
+        
+        echo "nix: DEBUG: ZSH is $ZSH"
+        # Launch Zsh using ONLY your nix-generated zshrc
+        exec ${pkgs.zsh}/bin/zsh -f --rcs "${zshrc}" "$@"
+
+        echo "nix: DEBUG: ZSH is $ZSH"
       '';
 
     in {
       # This combines the bin and the data so they BOTH appear in 'result'
       packages.${system}.default = pkgs.symlinkJoin {
-        name = "zshmul-package";
-        paths = [ zshmul-bin zshHome ];
+        name = "zshmul";
+        paths = [ zshmul zshHome ];
       };
     };
 }
