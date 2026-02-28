@@ -1,3 +1,4 @@
+# flake.nix (zshmul)
 {
   description = "Zshmul: The Classic OMZ Structure via Nix";
 
@@ -50,7 +51,7 @@
             src = typewritten-theme;
         }];
 
-        programs.zsh.initExtra = ''
+        initExtra = ''
           # Automatically launch tshmux if we are in an interactive session and not already in a mux session
           if command -v tshmux >/dev/null 2>&1 && [[ -z "$TMUX" && $- == *i* && -t 1 ]]; then
             tshmux
