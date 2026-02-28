@@ -2,9 +2,12 @@
 { typewritten-theme, tshmux }:
 
 { config, pkgs, ... }: {
+
   home.packages = with pkgs; [
     tshmux.packages.${pkgs.system}.default
-    lazygit bat # add more pkgs here
+    lazygit bat tree
+    xclip wl-clipboard
+    # add more pkgs here
   ];
 
   programs.zsh = {
@@ -14,7 +17,7 @@
     syntaxHighlighting.enable = true;
 
     sessionVariables = {
-      EDITOR = "nvim";
+      EDITOR = "nvim"; # later on shmulvim
       VIRTUAL_ENV_DISABLE_PROMPT = 1;
       HYPHEN_INSENSITIVE = "true";
 
