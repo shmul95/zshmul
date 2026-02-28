@@ -2,7 +2,7 @@
 { pkgs, wrappers, typewritten-theme, tshmux }:
 
 let
-  # create a (as much minimal as possible) zshrc 
+  # Create a (as much minimal as possible) zshrc 
   zshrc = pkgs.writeText ".zshrc" /* sh */ ''
     export EDITOR="nvim"; # will change into shmulvim
     export VIRTUAL_ENV_DISABLE_PROMPT=1;
@@ -23,6 +23,15 @@ let
     alias l="ls -la"
     alias lg="lazygit"
     alias nd="nix develop"
+
+    # Check if the tshmux binary is in the PATH
+    if command -v tshmux &> /dev/null; then
+      # Optional: only auto-launch if we are in an interactive shell
+      # and not already inside a multiplexer
+      if [[ -z "$TMUX" && -z "$TSHMUX" ]]; then
+        tshmux
+      fi
+    fi
   '';
 
   # Create the custom zsh directory with plugins and themes
