@@ -1,6 +1,6 @@
 # flake.nix (zshmul)
 {
-  description = "Zshmul: The Classic OMZ Structure via Nix";
+  description = "zshmul (zsh configuration) by shmul95";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
@@ -12,7 +12,7 @@
     homeManagerModules.default = { config, pkgs, ... }: {
       home.packages = with pkgs; [
         tshmux.packages.${pkgs.system}.default
-        lazygit bat
+        lazygit bat # add more pkgs here
       ];
 
       programs.zsh = {
