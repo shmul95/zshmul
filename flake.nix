@@ -11,12 +11,7 @@
 
   outputs = { self, nixpkgs, flake-utils, typewritten-theme, tshmux }: 
     flake-utils.lib.eachDefaultSystem (system:
-      let
-        pkgs = nixpkgs.legacyPackages.${system};
-      in {
-        packages = import ./packages.nix { inherit pkgs typewritten-theme tshmux; };
-      }
-    ) // {
-      homeManagerModules.default = import ./home-manager.nix { inherit typewritten-theme tshmux; };
-    };
+      let pkgs = nixpkgs.legacyPackages.${system};
+      in { packages = import ./packages.nix { inherit pkgs typewritten-theme tshmux; }; }
+    ) // { homeManagerModules.default = import ./home-manager.nix { inherit typewritten-theme tshmux; }; };
 }
