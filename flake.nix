@@ -36,7 +36,7 @@
         oh-my-zsh = {
           enable = true;
           plugins = [ "git" "z" ];
-          theme = "typewritten";
+          # theme = "typewritten";
         };
 
         shellAliases = {
