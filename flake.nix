@@ -12,6 +12,8 @@
   outputs = { self, nixpkgs, flake-utils, typewritten-theme, tshmux }: 
     flake-utils.lib.eachDefaultSystem (system:
       let
+        pkgs = nixpkgs.legacyPackages.${system};
+        
         zshHome = pkgs.runCommand "zshmul-custom" {} ''
           # Create a "custom" style directory
           mkdir -p $out/plugins/zsh-syntax-highlighting
@@ -76,17 +78,17 @@
         '';
       in {
         # This combines the bin and the data so they BOTH appear in 'result'
-        packages.${system}.default = pkgs.symlinkJoin {
+        packages.default = pkgs.symlinkJoin {
           name = "zshmul";
           paths = [ zshmul zshHome ];
         };
       }
     ) // {
-    homeManagerModules.default = { config, pkgs, ... }: {
-      home.packages = with pkgs; [
-        tshmux.packages.${pkgs.system}.default
-        lazygit bat # add more pkgs here
-      ];
+      homeManagerModules.default = { config, pkgs, ... }: {
+        home.packages = with pkgs; [
+          tshmux.packages.${pkgs.system}.default
+          lazygit bat # add more pkgs here
+        ];
 
       programs.zsh = {
         enable = true;
