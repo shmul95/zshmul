@@ -70,7 +70,7 @@ let
     binName = "zshmul";
 
     runtimeInputs = with pkgs; [ 
-      git lazygit bat tree
+      git lazygit bat tree wl-clipboard
       tshmux.packages.${pkgs.system}.default 
     ];
 
