@@ -18,5 +18,5 @@
     )
     # maybe it will disapear in the futur cause its better to have a full on pkgs rather than a
     # home manager module but the config is much prettier than the ./packages.nix one
-    // { homeManagerModules.default = import ./home-manager.nix { inherit typewritten-theme tshmux; }; };
+    // { homeManagerModules.default = import ./home-manager.nix { inherit typewritten-theme tshmux wrappers; }; };
 }
