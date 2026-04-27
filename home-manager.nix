@@ -132,6 +132,7 @@ in {
       syntaxHighlighting.enable = cfg.enableSyntaxHighlighting;
 
       sessionVariables = cfg.sessionVariables // {
+        ZSH_DISABLE_COMPFIX = "true";
         TYPEWRITTEN_PROMPT_LAYOUT = cfg.prompt.layout;
         TYPEWRITTEN_SYMBOL = cfg.prompt.symbol;
         TYPEWRITTEN_ARROW_SYMBOL = cfg.prompt.arrowSymbol;
